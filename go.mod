@@ -1,3 +1,3 @@
-module github.com/canonical/k8s-snap/hackathon/k8s-doc
+module github.com/HomayoonAlimohammadi/k8s-doctor
 
 go 1.22

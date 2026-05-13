@@ -7,17 +7,17 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/audit"
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/config"
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/doctor"
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/lab"
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/llm"
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/playbooks"
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/rag"
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools"
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools/kubectl"
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools/lxd"
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/web"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/audit"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/config"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/doctor"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/lab"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/llm"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/playbooks"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/rag"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools/kubectl"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools/lxd"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/web"
 )
 
 func main() {

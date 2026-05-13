@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/audit"
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/lab"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/audit"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/lab"
 )
 
 type AuditLogger interface {

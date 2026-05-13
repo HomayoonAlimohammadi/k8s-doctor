@@ -3,7 +3,7 @@ package doctor
 import (
 	"context"
 
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/rag"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/rag"
 )
 
 // RAGRetriever wraps a rag.MemoryIndex and implements Retriever.

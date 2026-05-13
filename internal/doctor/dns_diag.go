@@ -3,7 +3,7 @@ package doctor
 import (
 	"context"
 
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/playbooks"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/playbooks"
 )
 
 // KubectlDNSDiagnostic wraps a playbooks.Kubectl and implements DNSDiagnostic.

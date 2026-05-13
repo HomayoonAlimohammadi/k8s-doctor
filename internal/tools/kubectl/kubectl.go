@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools"
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools"
 )
 
 type NodeRunner interface {

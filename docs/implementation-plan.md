@@ -105,7 +105,7 @@ hackathon/k8s-doc/
 - [ ] Create `go.mod`:
 
 ```go
-module github.com/canonical/k8s-snap/hackathon/k8s-doc
+module github.com/HomayoonAlimohammadi/k8s-doctor
 
 go 1.24.13
 ```
@@ -735,7 +735,7 @@ import (
     "reflect"
     "testing"
 
-    "github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools"
+    "github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools"
 )
 
 func TestLaunchUsesProfilesAndImage(t *testing.T) {
@@ -771,7 +771,7 @@ import (
     "regexp"
     "strings"
 
-    "github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools"
+    "github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools"
 )
 
 type Config struct {
@@ -1050,7 +1050,7 @@ import (
     "reflect"
     "testing"
 
-    "github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools"
+    "github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools"
 )
 
 type fakeNodeRunner struct { commands [][]string }
@@ -1077,7 +1077,7 @@ import (
     "context"
     "fmt"
 
-    "github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools"
+    "github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools"
 )
 
 type NodeRunner interface {
@@ -1135,7 +1135,7 @@ import (
     "reflect"
     "testing"
 
-    "github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools"
+    "github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools"
 )
 
 type fakeNodeRunner struct { commands [][]string }
@@ -1163,7 +1163,7 @@ import (
     "fmt"
     "regexp"
 
-    "github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools"
+    "github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools"
 )
 
 type NodeRunner interface { Exec(ctx context.Context, node string, command []string) (tools.CommandResult, error) }
@@ -1655,7 +1655,7 @@ import (
     "context"
     "testing"
 
-    "github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools"
+    "github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools"
 )
 
 type fakeKubectl struct{ calls []string }
@@ -1682,7 +1682,7 @@ import (
     "context"
     "fmt"
 
-    "github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools"
+    "github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools"
 )
 
 type Kubectl interface {
@@ -2070,8 +2070,8 @@ import (
     "net/http"
     "os"
 
-    "github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/config"
-    "github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/web"
+    "github.com/HomayoonAlimohammadi/k8s-doctor/internal/config"
+    "github.com/HomayoonAlimohammadi/k8s-doctor/internal/web"
 )
 ```
 
@@ -2205,7 +2205,7 @@ import (
     "context"
     "net/http"
 
-    "github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/lab"
+    "github.com/HomayoonAlimohammadi/k8s-doctor/internal/lab"
 )
 
 type LabManager interface {
@@ -2267,7 +2267,7 @@ import (
     "context"
     "fmt"
 
-    "github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools"
+    "github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools"
 )
 
 type K8sSnap interface {
@@ -2517,8 +2517,8 @@ import (
     "testing"
     "time"
 
-    "github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools"
-    "github.com/canonical/k8s-snap/hackathon/k8s-doc/internal/tools/lxd"
+    "github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools"
+    "github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools/lxd"
 )
 
 func TestRealLXDCreateDestroy(t *testing.T) {
