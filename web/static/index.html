@@ -3,25 +3,665 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>k8s-doc</title>
-  <link rel="stylesheet" href="/static/styles.css">
+  <title>k8s-doctor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d1117;
+      --bg2:     #161b22;
+      --bg3:     #1c2128;
+      --border:  #30363d;
+      --text:    #e6edf3;
+      --muted:   #8b949e;
+      --accent:  #2563eb;
+      --accentH: #1d4ed8;
+      --green:   #3fb950;
+      --red:     #f85149;
+      --amber:   #d97706;
+      --mono: 'JetBrains Mono', 'Courier New', monospace;
+      --sans: 'Inter', system-ui, sans-serif;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--sans);
+      font-size: 14px;
+      background: var(--bg);
+      color: var(--text);
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 16px;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 16px;
+      margin-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .brand-icon { width: 30px; height: 30px; flex-shrink: 0; }
+
+    .brand-name {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .brand-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+    .section-label {
+      font-size: 10.5px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      padding: 8px 4px 4px;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s, opacity 0.12s;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .btn-icon { width: 14px; height: 14px; flex-shrink: 0; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-create {
+      background: rgba(37,99,235,0.12); color: #93c5fd;
+      border-color: rgba(37,99,235,0.22);
+    }
+    .btn-create:hover:not(:disabled) {
+      background: rgba(37,99,235,0.22); border-color: rgba(37,99,235,0.38);
+    }
+
+    .btn-break {
+      background: rgba(217,119,6,0.1); color: #fbbf24;
+      border-color: rgba(217,119,6,0.18);
+    }
+    .btn-break:hover:not(:disabled) {
+      background: rgba(217,119,6,0.2); border-color: rgba(217,119,6,0.35);
+    }
+
+    .btn-diagnose {
+      background: rgba(37,99,235,0.12); color: #93c5fd;
+      border-color: rgba(37,99,235,0.22);
+    }
+    .btn-diagnose:hover:not(:disabled) {
+      background: rgba(37,99,235,0.22); border-color: rgba(37,99,235,0.38);
+    }
+
+    .btn-destroy {
+      background: rgba(220,38,38,0.1); color: #fca5a5;
+      border-color: rgba(220,38,38,0.18);
+    }
+    .btn-destroy:hover:not(:disabled) {
+      background: rgba(220,38,38,0.2); border-color: rgba(220,38,38,0.35);
+    }
+
+    .status-card {
+      margin-top: auto;
+      padding: 12px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+      flex-shrink: 0;
+    }
+
+    .status-header {
+      font-size: 10.5px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .status-row { display: flex; align-items: center; gap: 8px; }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%; flex-shrink: 0;
+    }
+    .status-dot.unknown  { background: #4b5563; }
+    .status-dot.running  {
+      background: var(--green);
+      box-shadow: 0 0 0 2px rgba(63,185,80,0.2);
+      animation: pulsedot 2s ease-in-out infinite;
+    }
+    .status-dot.destroyed { background: var(--red); }
+
+    @keyframes pulsedot {
+      0%,100% { box-shadow: 0 0 0 2px rgba(63,185,80,0.2); }
+      50%      { box-shadow: 0 0 0 4px rgba(63,185,80,0.07); }
+    }
+
+    .status-val {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    /* ── Main ── */
+    .main {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+    }
+    .messages::-webkit-scrollbar { width: 5px; }
+    .messages::-webkit-scrollbar-track { background: transparent; }
+    .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--muted);
+      text-align: center;
+      padding: 40px;
+    }
+    .empty-icon  { width: 40px; height: 40px; opacity: 0.28; }
+    .empty-title { font-size: 15px; font-weight: 500; color: var(--text); opacity: 0.35; }
+    .empty-hint  { font-size: 13px; opacity: 0.5; max-width: 260px; line-height: 1.55; }
+
+    /* Messages */
+    .msg-row { display: flex; max-width: 72%; }
+    .msg-row.user   { align-self: flex-end;   flex-direction: row-reverse; }
+    .msg-row.doctor { align-self: flex-start; }
+
+    .msg-avatar-wrap { width: 28px; height: 28px; flex-shrink: 0; margin-top: 20px; }
+    .msg-row.user   .msg-avatar-wrap { margin-left: 8px; }
+    .msg-row.doctor .msg-avatar-wrap { margin-right: 8px; }
+
+    .msg-avatar-icon {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .msg-avatar-icon.user   { background: #21262d; }
+    .msg-avatar-icon.doctor { background: rgba(37,99,235,0.16); }
+
+    .msg-body { display: flex; flex-direction: column; gap: 3px; }
+
+    .msg-name { font-size: 11px; color: var(--muted); font-weight: 500; }
+    .msg-row.user .msg-name { text-align: right; }
+
+    .msg-bubble {
+      padding: 10px 14px;
+      border-radius: 10px;
+      line-height: 1.6;
+      font-size: 14px;
+      word-break: break-word;
+    }
+
+    .msg-bubble.user {
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 10px 3px 10px 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .msg-bubble.doctor {
+      background: #0c1320;
+      border: 1px solid rgba(37,99,235,0.2);
+      border-radius: 3px 10px 10px 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    /* Markdown in doctor bubble */
+    .msg-bubble.doctor > *:first-child { margin-top: 0 !important; }
+    .msg-bubble.doctor > *:last-child  { margin-bottom: 0 !important; }
+
+    .msg-bubble.doctor h1,
+    .msg-bubble.doctor h2,
+    .msg-bubble.doctor h3,
+    .msg-bubble.doctor h4 {
+      font-size: 13.5px; font-weight: 600;
+      color: #93c5fd; margin: 12px 0 5px;
+    }
+    .msg-bubble.doctor p  { margin: 5px 0; }
+    .msg-bubble.doctor ul,
+    .msg-bubble.doctor ol { padding-left: 18px; margin: 5px 0; }
+    .msg-bubble.doctor li { margin: 2px 0; }
+
+    .msg-bubble.doctor code {
+      font-family: var(--mono); font-size: 12px;
+      background: rgba(0,0,0,0.4);
+      padding: 1px 5px; border-radius: 3px; color: #7dd3fc;
+    }
+    .msg-bubble.doctor pre {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(37,99,235,0.12);
+      border-radius: 6px; padding: 12px; margin: 8px 0; overflow-x: auto;
+    }
+    .msg-bubble.doctor pre code {
+      background: none; padding: 0; color: #cbd5e1;
+      font-size: 12px; line-height: 1.55;
+    }
+    .msg-bubble.doctor strong   { color: #e2e8f0; font-weight: 600; }
+    .msg-bubble.doctor em       { color: #94a3b8; }
+    .msg-bubble.doctor hr       { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+    .msg-bubble.doctor blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 10px; color: var(--muted); margin: 6px 0;
+    }
+
+    /* Typing */
+    .typing-bubble { display: flex; align-items: center; gap: 5px; padding: 4px 2px; }
+    .typing-dot {
+      width: 5px; height: 5px;
+      background: var(--muted); border-radius: 50%;
+      animation: tdot 1.3s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.30s; }
+    @keyframes tdot {
+      0%,60%,100% { transform: translateY(0);    opacity: 0.35; }
+      30%         { transform: translateY(-4px); opacity: 1;    }
+    }
+
+    /* System / event pills */
+    .msg-system {
+      align-self: center;
+      padding: 3px 10px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    /* ── Input bar ── */
+    .input-bar {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      padding: 14px 36px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    .input-wrap { flex: 1; }
+
+    .chat-input {
+      display: block;
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.5;
+      resize: none;
+      outline: none;
+      min-height: 44px;
+      max-height: 116px;
+      overflow-y: auto;
+      transition: border-color 0.12s;
+    }
+    .chat-input:focus       { border-color: var(--accent); }
+    .chat-input::placeholder { color: var(--muted); }
+
+    .send-btn {
+      width: 44px; height: 44px;
+      background: var(--accent);
+      border: none; border-radius: 8px;
+      color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.12s, opacity 0.12s;
+    }
+    .send-btn:hover:not(:disabled) { background: var(--accentH); }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  </style>
 </head>
 <body>
-  <aside>
-    <h1>k8s-doc</h1>
-    <button id="create-lab">Create/reuse lab</button>
-    <button id="break-dns">Break DNS</button>
-    <button id="diagnose-dns">Diagnose DNS</button>
-    <button id="destroy-lab">Destroy lab</button>
-    <pre id="lab-status">Lab status: unknown</pre>
-  </aside>
-  <main>
-    <section id="messages"></section>
-    <form id="chat-form">
-      <input id="question" placeholder="Ask why something is broken..." autocomplete="off">
-      <button type="submit">Ask</button>
-    </form>
-  </main>
-  <script src="/static/app.js"></script>
+
+<aside class="sidebar">
+  <div class="brand">
+    <svg class="brand-icon" viewBox="0 0 32 32" fill="none">
+      <polygon points="16,2.5 27.5,9 27.5,23 16,29.5 4.5,23 4.5,9"
+        fill="rgba(59,130,246,0.1)" stroke="#3b82f6" stroke-width="1.5"/>
+      <polyline points="9.5,20 15,13 9.5,8"
+        stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="17.5" y1="20" x2="23" y2="20"
+        stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <div class="brand-name">k8s-doctor</div>
+      <div class="brand-sub">AI K8s troubleshooter</div>
+    </div>
+  </div>
+
+  <div class="section-label">Lab Controls</div>
+
+  <button class="btn btn-create" id="btn-create">
+    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <rect x="2" y="3" width="20" height="7" rx="1.5"/>
+      <rect x="2" y="14" width="20" height="7" rx="1.5"/>
+      <circle cx="5.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+      <circle cx="5.5" cy="17.5" r="1" fill="currentColor" stroke="none"/>
+    </svg>
+    Create Lab
+  </button>
+
+  <button class="btn btn-break" id="btn-break">
+    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </svg>
+    Break DNS
+  </button>
+
+  <button class="btn btn-diagnose" id="btn-diagnose">
+    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    </svg>
+    Diagnose DNS
+  </button>
+
+  <button class="btn btn-destroy" id="btn-destroy">
+    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="3 6 5 6 21 6"/>
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+      <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
+    </svg>
+    Destroy Lab
+  </button>
+
+  <div class="status-card">
+    <div class="status-header">Lab Status</div>
+    <div class="status-row">
+      <span class="status-dot unknown" id="status-dot"></span>
+      <span class="status-val" id="status-text">unknown</span>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="messages" id="messages">
+    <div class="empty-state" id="empty-state">
+      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <div class="empty-title">No diagnostics yet</div>
+      <div class="empty-hint">Create a lab, break DNS, then diagnose or ask a question.</div>
+    </div>
+  </div>
+
+  <div class="input-bar">
+    <div class="input-wrap">
+      <textarea class="chat-input" id="chat-input"
+        placeholder="Ask why something is broken…" rows="1"></textarea>
+    </div>
+    <button class="send-btn" id="send-btn" title="Send (Enter)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+<script>
+  marked.use({ breaks: true, gfm: true });
+
+  const messagesEl  = document.getElementById('messages');
+  const emptyState  = document.getElementById('empty-state');
+  const chatInput   = document.getElementById('chat-input');
+  const sendBtn     = document.getElementById('send-btn');
+  const statusDot   = document.getElementById('status-dot');
+  const statusText  = document.getElementById('status-text');
+  const btnCreate   = document.getElementById('btn-create');
+  const btnBreak    = document.getElementById('btn-break');
+  const btnDiagnose = document.getElementById('btn-diagnose');
+  const btnDestroy  = document.getElementById('btn-destroy');
+
+  const ALL_BTNS = [btnCreate, btnBreak, btnDiagnose, btnDestroy, sendBtn];
+
+  const DOCTOR_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+    <rect x="3" y="7.5" width="18" height="13" rx="2.5" stroke="#60a5fa" stroke-width="1.5"/>
+    <circle cx="9" cy="14" r="2" fill="#60a5fa"/>
+    <circle cx="15" cy="14" r="2" fill="#60a5fa"/>
+    <path d="M12 4.5V7.5" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="12" cy="3" r="1.5" fill="#60a5fa"/>
+  </svg>`;
+
+  const USER_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+    stroke="#9ca3af" stroke-width="2" stroke-linecap="round">
+    <circle cx="12" cy="8" r="4"/>
+    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+  </svg>`;
+
+  function setLabStatus(s) {
+    const v = (s || 'unknown').trim();
+    statusText.textContent = v;
+    statusDot.className = 'status-dot ' +
+      (v === 'running' ? 'running' : v === 'destroyed' ? 'destroyed' : 'unknown');
+  }
+
+  function hideEmpty() { if (emptyState) emptyState.style.display = 'none'; }
+  function scroll()    { messagesEl.scrollTop = messagesEl.scrollHeight; }
+
+  function appendSystem(text) {
+    hideEmpty();
+    const el = document.createElement('div');
+    el.className = 'msg-system';
+    el.textContent = text;
+    messagesEl.appendChild(el);
+    scroll();
+  }
+
+  function addMessage(role, content, asMarkdown) {
+    hideEmpty();
+    const row = document.createElement('div');
+    row.className = `msg-row ${role}`;
+
+    const avatarWrap = document.createElement('div');
+    avatarWrap.className = 'msg-avatar-wrap';
+    const avatarIcon = document.createElement('div');
+    avatarIcon.className = `msg-avatar-icon ${role}`;
+    avatarIcon.innerHTML = role === 'doctor' ? DOCTOR_SVG : USER_SVG;
+    avatarWrap.appendChild(avatarIcon);
+
+    const body = document.createElement('div');
+    body.className = 'msg-body';
+
+    const name = document.createElement('div');
+    name.className = 'msg-name';
+    name.textContent = role === 'doctor' ? 'k8s-doctor' : 'You';
+
+    const bubble = document.createElement('div');
+    bubble.className = `msg-bubble ${role}`;
+    if (asMarkdown) {
+      bubble.innerHTML = marked.parse(content);
+    } else {
+      bubble.textContent = content;
+    }
+
+    body.appendChild(name);
+    body.appendChild(bubble);
+    row.appendChild(avatarWrap);
+    row.appendChild(body);
+    messagesEl.appendChild(row);
+    scroll();
+  }
+
+  function addTyping() {
+    hideEmpty();
+    const row = document.createElement('div');
+    row.className = 'msg-row doctor';
+    row.id = 'typing';
+
+    const avatarWrap = document.createElement('div');
+    avatarWrap.className = 'msg-avatar-wrap';
+    const avatarIcon = document.createElement('div');
+    avatarIcon.className = 'msg-avatar-icon doctor';
+    avatarIcon.innerHTML = DOCTOR_SVG;
+    avatarWrap.appendChild(avatarIcon);
+
+    const body = document.createElement('div');
+    body.className = 'msg-body';
+
+    const name = document.createElement('div');
+    name.className = 'msg-name';
+    name.textContent = 'k8s-doctor';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble doctor';
+    bubble.innerHTML = `<div class="typing-bubble">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>`;
+
+    body.appendChild(name);
+    body.appendChild(bubble);
+    row.appendChild(avatarWrap);
+    row.appendChild(body);
+    messagesEl.appendChild(row);
+    scroll();
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('typing');
+    if (el) el.remove();
+  }
+
+  function setBusy(busy) {
+    ALL_BTNS.forEach(b => { b.disabled = busy; });
+    chatInput.disabled = busy;
+  }
+
+  async function post(path, body) {
+    const r = await fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body || {}),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+    return data;
+  }
+
+  async function sendChat(question) {
+    addMessage('user', question);
+    addTyping();
+    setBusy(true);
+    try {
+      const data = await post('/api/chat', { question });
+      removeTyping();
+      addMessage('doctor', data.answer || data.error || '(no answer)', true);
+    } catch (err) {
+      removeTyping();
+      addMessage('doctor', `Error: ${err.message}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function labAction(label, path) {
+    appendSystem(`→ ${label}…`);
+    setBusy(true);
+    try {
+      const data = await post(path);
+      const s = data.status || 'unknown';
+      setLabStatus(s);
+      appendSystem(`✓ ${label}: ${s}`);
+    } catch (err) {
+      appendSystem(`✗ ${label}: ${err.message}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  btnCreate.addEventListener('click',   () => labAction('Create Lab',  '/api/lab/create'));
+  btnBreak.addEventListener('click',    () => labAction('Break DNS',   '/api/dns/break'));
+  btnDiagnose.addEventListener('click', () => sendChat('Diagnose the DNS issue in the current lab.'));
+  btnDestroy.addEventListener('click',  () => labAction('Destroy Lab', '/api/lab/destroy'));
+
+  function resize() {
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 116) + 'px';
+  }
+
+  chatInput.addEventListener('input', resize);
+
+  chatInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      const q = chatInput.value.trim();
+      if (!q) return;
+      chatInput.value = '';
+      resize();
+      sendChat(q);
+    }
+  });
+
+  sendBtn.addEventListener('click', () => {
+    const q = chatInput.value.trim();
+    if (!q) return;
+    chatInput.value = '';
+    resize();
+    sendChat(q);
+  });
+
+  post('/api/lab/status').then(d => setLabStatus(d.status)).catch(() => {});
+</script>
 </body>
 </html>

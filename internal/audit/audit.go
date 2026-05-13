@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sync"
@@ -35,12 +36,15 @@ type Logger struct {
 }
 
 func NewLogger(path string) *Logger {
+	slog.Debug("audit.NewLogger", "component", "audit", "path", path)
 	return &Logger{path: path}
 }
 
 func (l *Logger) Record(ctx context.Context, entry Entry) error {
 	select {
 	case <-ctx.Done():
+		slog.Warn("audit.Record cancelled",
+			"component", "audit", "tool", entry.Tool, "error", ctx.Err())
 		return ctx.Err()
 	default:
 	}
@@ -53,18 +57,28 @@ func (l *Logger) Record(ctx context.Context, entry Entry) error {
 	}
 
 	if err := os.MkdirAll(filepath.Dir(l.path), 0o755); err != nil {
+		slog.Error("audit.Record mkdir failed",
+			"component", "audit", "path", l.path, "error", err)
 		return fmt.Errorf("create audit directory: %w", err)
 	}
 
 	f, err := os.OpenFile(l.path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
+		slog.Error("audit.Record open failed",
+			"component", "audit", "path", l.path, "error", err)
 		return fmt.Errorf("open audit log: %w", err)
 	}
 	defer f.Close()
 
 	enc := json.NewEncoder(f)
 	if err := enc.Encode(entry); err != nil {
+		slog.Error("audit.Record encode failed",
+			"component", "audit", "path", l.path, "tool", entry.Tool, "error", err)
 		return fmt.Errorf("write audit entry: %w", err)
 	}
+	slog.Debug("audit.Record ok",
+		"component", "audit", "path", l.path,
+		"session_id", entry.SessionID, "tool", entry.Tool,
+		"commands", len(entry.Commands), "duration_ms", entry.DurationMS)
 	return nil
 }

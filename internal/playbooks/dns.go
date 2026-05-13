@@ -3,7 +3,10 @@ package playbooks
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"time"
 
+	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/logging"
 	"github.com/HomayoonAlimohammadi/k8s-doctor/internal/tools"
 )
 
@@ -26,6 +29,8 @@ type DNSPlaybook struct{ kubectl Kubectl }
 func NewDNSPlaybook(kubectl Kubectl) *DNSPlaybook { return &DNSPlaybook{kubectl: kubectl} }
 
 func (p *DNSPlaybook) Collect(ctx context.Context, controlPlane string) (DNSReport, error) {
+	start := time.Now()
+	slog.Info("DNSPlaybook.Collect start", "component", "playbooks.dns", "control_plane", controlPlane)
 	evidence := map[string]string{}
 	calls := []struct {
 		key string
@@ -45,23 +50,42 @@ func (p *DNSPlaybook) Collect(ctx context.Context, controlPlane string) (DNSRepo
 		}},
 	}
 	for _, call := range calls {
+		callStart := time.Now()
+		slog.Debug("DNSPlaybook.Collect step", "component", "playbooks.dns", "step", call.key)
 		result, err := call.fn()
 		if err != nil {
+			slog.Error("DNSPlaybook.Collect step failed",
+				"component", "playbooks.dns", "step", call.key,
+				"duration_ms", time.Since(callStart).Milliseconds(),
+				"exit", result.ExitCode, "stderr", logging.Truncate(result.Stderr, 500), "error", err)
 			return DNSReport{}, fmt.Errorf("collect DNS %s: %w", call.key, err)
 		}
+		slog.Debug("DNSPlaybook.Collect step ok",
+			"component", "playbooks.dns", "step", call.key,
+			"duration_ms", time.Since(callStart).Milliseconds(),
+			"exit", result.ExitCode, "stdout_chars", len(result.Stdout))
 		evidence[call.key] = result.Stdout
 	}
+	slog.Info("DNSPlaybook.Collect complete",
+		"component", "playbooks.dns", "control_plane", controlPlane,
+		"keys", len(evidence), "duration_ms", time.Since(start).Milliseconds())
 	return DNSReport{Summary: "Collected CoreDNS pods, service, endpoints, and ConfigMap evidence.", Evidence: evidence}, nil
 }
 
 func (p *DNSPlaybook) BreakByScalingToZero(ctx context.Context, controlPlane string) (tools.CommandResult, error) {
+	slog.Warn("DNSPlaybook.BreakByScalingToZero (DESTRUCTIVE)",
+		"component", "playbooks.dns", "control_plane", controlPlane)
 	return p.kubectl.Scale(ctx, controlPlane, "deployment/coredns", "kube-system", 0)
 }
 
 func (p *DNSPlaybook) RepairByScalingToOne(ctx context.Context, controlPlane string) (tools.CommandResult, error) {
+	slog.Info("DNSPlaybook.RepairByScalingToOne",
+		"component", "playbooks.dns", "control_plane", controlPlane)
 	return p.kubectl.Scale(ctx, controlPlane, "deployment/coredns", "kube-system", 1)
 }
 
 func (p *DNSPlaybook) Verify(ctx context.Context, controlPlane string) (tools.CommandResult, error) {
+	slog.Info("DNSPlaybook.Verify (running DNS probe)",
+		"component", "playbooks.dns", "control_plane", controlPlane)
 	return p.kubectl.RunDNSProbe(ctx, controlPlane)
 }
