@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>k8s-doc</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <aside>
+    <h1>k8s-doc</h1>
+    <button id="create-lab">Create/reuse lab</button>
+    <button id="break-dns">Break DNS</button>
+    <button id="diagnose-dns">Diagnose DNS</button>
+    <button id="destroy-lab">Destroy lab</button>
+    <pre id="lab-status">Lab status: unknown</pre>
+  </aside>
+  <main>
+    <section id="messages"></section>
+    <form id="chat-form">
+      <input id="question" placeholder="Ask why something is broken..." autocomplete="off">
+      <button type="submit">Ask</button>
+    </form>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+body { margin: 0; display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; font-family: system-ui, sans-serif; background: #111827; color: #f9fafb; }
+aside { padding: 1rem; background: #1f2937; border-right: 1px solid #374151; }
+main { display: grid; grid-template-rows: 1fr auto; }
+button, input { font: inherit; padding: .6rem; border-radius: .4rem; border: 1px solid #4b5563; }
+button { display: block; width: 100%; margin: .5rem 0; background: #2563eb; color: white; cursor: pointer; }
+#messages { padding: 1rem; overflow: auto; }
+article { white-space: pre-wrap; margin: .75rem 0; padding: .75rem; border-radius: .5rem; }
+.user { background: #374151; }
+.doctor { background: #064e3b; }
+form { display: grid; grid-template-columns: 1fr auto; gap: .5rem; padding: 1rem; background: #1f2937; }
